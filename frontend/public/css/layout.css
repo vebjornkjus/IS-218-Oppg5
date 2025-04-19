@@ -1,0 +1,46 @@
+/* layout.css — posisjonering av map og sidebar */
+
+#sidebar {
+    position: absolute;
+    top: var(--header-height);
+    bottom: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    background: var(--color-white);
+    padding: 16px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    z-index: 1000;
+  }
+  
+  #sidebar h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+  }
+  
+  #sidebar button {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--color-accent);
+    color: var(--color-white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  
+  #sidebar button:focus {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+  }
+  
+  #map {
+    position: absolute;
+    top: var(--header-height);
+    bottom: 0;
+    left: var(--sidebar-width);
+    right: 0;
+  }

@@ -1,0 +1,8 @@
+/* reset.css — enkel reset for margin/padding og box-sizing */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}

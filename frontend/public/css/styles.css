@@ -1,0 +1,130 @@
+:root {
+  --color-bg: #f5f7fa;
+  --color-primary: #2c3e50;
+  --color-accent: #3498db;
+  --color-white: #ffffff;
+  --color-control-bg: rgba(255,255,255,0.9);
+  --focus-outline: 3px solid #2980b9;
+  --header-height: 72px; /* New variable added */
+  --sidebar-width: 250px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-primary);
+}
+
+.app-header {
+  height: var(--header-height); /* New property added */
+}
+
+#map {
+  position: absolute;
+  top: var(--header-height);
+  bottom: 0;
+  left: var(--sidebar-width);
+  right: 0;
+}
+
+#controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: var(--color-control-bg);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-left: auto;
+}
+#controls label {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--color-primary);
+  margin-right: 12px;
+}
+#controls input[type="text"] {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+#controls button {
+  padding: 6px 12px;
+  margin-left: 4px;
+  background: var(--color-accent);
+  color: var(--color-white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+#controls button:focus,
+#controls input:focus {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+}
+
+/* Sidebar styling */
+#sidebar {
+  position: absolute;
+  top: var(--header-height);
+  bottom: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  background: var(--color-white);
+  padding: 16px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  z-index: 1000;
+}
+#sidebar h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  color: var(--color-primary);
+}
+#sidebar button {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--color-accent);
+  color: var(--color-white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+#sidebar button:focus {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+}
+
+/* Legend styling */
+.legend {
+  background: var(--color-white);
+  padding: 8px 12px;
+  line-height: 1.6;
+  color: var(--color-primary);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  font-size: 0.9rem;
+}
+.legend h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.legend i {
+  width: 16px;
+  height: 16px;
+  float: left;
+  margin-right: 6px;
+  opacity: 1;
+}
+.legend br {
+  clear: both;
+}

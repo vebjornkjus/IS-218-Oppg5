@@ -1,0 +1,39 @@
+/* base.css — variabler, typografi og body */
+:root {
+    --color-bg: #f5f7fa;
+    --color-primary: #2c3e50;
+    --color-accent: #3498db;
+    --color-white: #ffffff;
+    --color-control-bg: rgba(255,255,255,0.9);
+    --focus-outline: 3px solid #2980b9;
+    --header-height: 72px;
+    --sidebar-width: 250px;
+  }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-primary);
+  }
+  
+  .app-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-white);
+    padding: 16px 24px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    z-index: 1001;
+  }
+  
+  .app-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }

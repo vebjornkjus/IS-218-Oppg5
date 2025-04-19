@@ -1,0 +1,117 @@
+/* components.css — knapper, input, kontrollpanel, legend, søk */
+
+#controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    background: var(--color-control-bg);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-left: auto;
+  }
+  
+  #controls label {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--color-primary);
+  }
+  
+  #controls input[type="text"] {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: 4px;
+  }
+  
+  #controls button {
+    padding: 6px 12px;
+    margin-left: 4px;
+    background: var(--color-accent);
+    color: var(--color-white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  #controls button:focus,
+  #controls input:focus {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+  }
+  
+  /* Search panel */
+  
+  #search-panel {
+    margin-bottom: 16px;
+  }
+  
+  #search-panel h2 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+  
+  .search-field {
+    width: 100%;
+    padding: 8px;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .search-field:focus {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+  }
+  
+  .search-button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--color-accent);
+    color: var(--color-white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  .search-button:focus {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+  }
+  
+  /* Legend */
+  
+  .legend {
+    background: var(--color-white);
+    padding: 8px 12px;
+    line-height: 1.6;
+    color: var(--color-primary);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    font-size: 0.9rem;
+  }
+  
+  .legend h4 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .legend i {
+    width: 16px;
+    height: 16px;
+    float: left;
+    margin-right: 6px;
+    opacity: 1;
+  }
+  
+  .legend br {
+    clear: both;
+  }
