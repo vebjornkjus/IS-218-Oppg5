@@ -1,7 +1,7 @@
 export function initMap() {
-    // Deaktivér standardzoom og sett visning
+    // Sett Kristiansand som startposisjon
     const map = L.map('map', { zoomControl: false })
-      .setView([61.14671, 9.9956], 6);
+      .setView([58.14671, 8.01002], 12);
     // Flytt zoom‑kontroller
     L.control.zoom({ position: 'topright' }).addTo(map);
     // Legg til bakgrunnskart
