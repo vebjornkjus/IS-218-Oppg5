@@ -49,3 +49,7 @@ Vi har begynt å utforske bruk av kunstig intelligens til å identifisere bygnin
 - Kristoffer F. Holmsen – kristofffh@uia.no  
 - Kristian Kalleberg – kristianka@uia.no  
 - Vebjørn F. Kjus – vebjornfk@uia.no
+
+## Hvordan kjøre program på egen pc?
+1. Åpne terminalen og kjør "node server.js"
+2. Bruk Live Server-extension for å kjøre index.html i nettleseren
