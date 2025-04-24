@@ -4,9 +4,10 @@ export function addLegend(map) {
     legend.onAdd = () => {
       const div = L.DomUtil.create('div','legend');
       div.innerHTML = `
-        <h4>Støysonekategori</h4>
-        <i style="background:red"></i> Høy sonesone<br>
-        <i style="background:yellow"></i> Moderat sonesone<br>
+        <h4>Flomsoner</h4>
+        <i style="background:#3388ff"></i> Flomareal<br>
+        <i style="background:#1e5799"></i> Flomgrense<br>
+        <i style="background:#4d94ff"></i> Elv/Bekk<br>
       `;
       return div;
     };
