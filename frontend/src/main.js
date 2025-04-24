@@ -3,66 +3,39 @@ import { addLegend }    from './components/legend.js';
 import { setupFilters } from './components/filters.js';
 import { setupSearch }  from './components/search.js';
 import { setupSidebar } from './components/sidebar.js';
-import { planeIcon, heliIcon, getAirportIcon } from './maps/icons.js';
+import { fetchZones } from './services/dataService.js';
 
 (async () => {
-  const map      = initMap();
-  const { red, yellow } = addPatterns(map);
-  const data     = await fetchZones();
+  const map = initMap();
+  const data = await fetchZones();
 
-  // Bygg GeoJSON-laget for støysonekategorier
+  // Build GeoJSON layer for flood zones
   const features = data.map(r => ({
     type: 'Feature',
-    properties: { lokalId: r.lokalId, støysonekategori: r.støysonekategori, beregnetÅr: r.beregnetÅr },
+    properties: { lokalId: r.lokalId, flomtype: r.flomtype, år: r.år },
     geometry: r.geom
   }));
-  const geojsonLayer = L.geoJSON({ type:'FeatureCollection', features }, {
+  
+  const geojsonLayer = L.geoJSON({ type: 'FeatureCollection', features }, {
     style: f => ({
-      color:'#333', weight:1,
-      fillPattern: f.properties.støysonekategori==='R'?red:yellow
+      color: '#3388ff', 
+      weight: 2,
+      fillColor: '#3388ff',
+      fillOpacity: 0.4,
+      opacity: 0.8
     }),
     onEachFeature: (f, layer) => {
-      layer.bindPopup(`<strong>ID:</strong>${f.properties.lokalId}<br><strong>År:</strong>${f.properties.beregnetÅr}`);
-      const el = layer.getElement?.()??layer._path;
-      if(el) el.setAttribute('tabindex','0');
-    }
-  }).addTo(map);
-
-  // Legg til flyplasser med spesifikke ikoner
-  const airports = await fetchAirports();
-
-  // Konverter til GeoJSON
-  const airportGeoJson = {
-    type: 'FeatureCollection',
-    features: airports.map(a => ({
-      type: 'Feature',
-      properties: {
-        id: a.id,
-        navn: a.navn,
-        iata: a.iataKode,
-        lufthavntype: a.lufthavntype,
-        trafikktype: a.trafikktype
-      },
-      geometry: a.geom
-    }))
-  };
-
-  L.geoJSON(airportGeoJson, {
-    pointToLayer: (feature, latlng) => {
-      const icon = getAirportIcon(feature.properties.lufthavntype);
-      return L.marker(latlng, { icon });
-    },
-    onEachFeature: (feature, layer) => {
       layer.bindPopup(`
-        <strong>${feature.properties.navn}</strong><br>
-        IATA: ${feature.properties.iata}<br>
-        Type: ${feature.properties.lufthavntype}<br>
-        Trafikktype: ${feature.properties.trafikktype}
+        <strong>ID:</strong> ${f.properties.lokalId}<br>
+        <strong>Type:</strong> ${f.properties.flomtype}<br>
+        <strong>År:</strong> ${f.properties.år}
       `);
+      const el = layer.getElement?.() ?? layer._path;
+      if(el) el.setAttribute('tabindex', '0');
     }
   }).addTo(map);
 
-  // UI‑bygging
+  // UI setup
   addLegend(map);
   setupFilters(geojsonLayer);
   setupSearch(map, geojsonLayer);

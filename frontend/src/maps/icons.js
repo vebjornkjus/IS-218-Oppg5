@@ -1,1 +1,1 @@
-// Ikoner for forskjellige datasett
+// Empty file - no icons needed for flood data visualization
