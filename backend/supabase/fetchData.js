@@ -8,7 +8,6 @@ const path = require('path');
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-// IMPORTANT: Replace these with your actual table names containing 'flomdata'
 const tableNames = [
     'Flomdata — Elvbekk',
     'Flomdata — Flomareal',
