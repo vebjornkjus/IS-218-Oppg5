@@ -4,9 +4,11 @@ import { setupFilters } from './components/filters.js';
 import { setupSearch }  from './components/search.js';
 import { setupSidebar } from './components/sidebar.js';
 import { fetchZones } from './services/dataService.js';
+import { CompassControl } from './components/kompass.js';
 
 (async () => {
   const map = initMap();
+  map.addControl(new CompassControl()); 
   const data = await fetchZones();
 
   // Build GeoJSON layer for flood zones

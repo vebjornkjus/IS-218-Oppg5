@@ -22,7 +22,7 @@
     align-items: center;
     justify-content: space-between;
     background: var(--color-white);
-    padding: 16px 24px;
+    padding: 4px 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: fixed;
     top: 0;
