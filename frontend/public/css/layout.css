@@ -1,46 +1,71 @@
-/* layout.css — posisjonering av map og sidebar */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
 
 #sidebar {
-    position: absolute;
-    top: var(--header-height);
-    bottom: 0;
-    left: 0;
-    width: var(--sidebar-width);
-    background: var(--color-white);
-    padding: 16px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    overflow-y: auto;
-    z-index: 1000;
+  background: rgba(142, 142, 142, 0.25);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20.2px);
+  -webkit-backdrop-filter: blur(11.2px);
+  border: 1px solid rgba(47, 47, 47, 0.3);
+  padding: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 250px; /* Fixed width */
+  max-height: 400px; /* Limit height */
+  border-radius: 16px; /* Rounded corners */
+}
+
+#sidebar h2 {
+  margin-top: 0;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  color: var(--color-primary);
+}
+
+#sidebar button {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: var(--color-accent);
+  color: var(--color-white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: clamp(0.8rem, 1vw, 1rem);
+}
+
+#sidebar button:focus {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+}
+
+#map {
+  height: 100vh;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  #sidebar {
+    width: calc(100% - 40px); /* Full width minus margins */
+    max-height: 40vh;
+    bottom: 10px;
+    left: 10px;
   }
-  
-  #sidebar h2 {
-    margin-top: 0;
-    font-size: 1.1rem;
-    color: var(--color-primary);
-  }
-  
-  #sidebar button {
-    display: block;
-    width: 100%;
-    margin-top: 8px;
-    padding: 8px;
-    background: var(--color-accent);
-    color: var(--color-white);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-  
-  #sidebar button:focus {
-    outline: var(--focus-outline);
-    outline-offset: 2px;
-  }
-  
-  #map {
-    position: absolute;
-    top: var(--header-height);
-    bottom: 0;
-    left: var(--sidebar-width);
-    right: 0;
-  }
+}
