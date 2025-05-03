@@ -1,45 +1,37 @@
-import { initMap }      from './maps/mapInit.js';
-import { addLegend }    from './components/legend.js';
-import { setupFilters } from './components/filters.js';
-import { setupSearch }  from './components/search.js';
-import { setupSidebar } from './components/sidebar.js';
-import { fetchZones } from './services/dataService.js';
+import { initMap } from './maps/mapInit.js';
 import { CompassControl } from './components/kompass.js';
+import {  getElvbekkLayer } from './layers/elvbekk.js';
 
 (async () => {
-  const map = initMap();
-  map.addControl(new CompassControl()); 
-  const data = await fetchZones();
+  try {
+    const map = initMap();
+    map.addControl(new CompassControl());
 
-  // Build GeoJSON layer for flood zones
-  const features = data.map(r => ({
-    type: 'Feature',
-    properties: { lokalId: r.lokalId, flomtype: r.flomtype, år: r.år },
-    geometry: r.geom
-  }));
-  
-  const geojsonLayer = L.geoJSON({ type: 'FeatureCollection', features }, {
-    style: f => ({
-      color: '#3388ff', 
-      weight: 2,
-      fillColor: '#3388ff',
-      fillOpacity: 0.4,
-      opacity: 0.8
-    }),
-    onEachFeature: (f, layer) => {
-      layer.bindPopup(`
-        <strong>ID:</strong> ${f.properties.lokalId}<br>
-        <strong>Type:</strong> ${f.properties.flomtype}<br>
-        <strong>År:</strong> ${f.properties.år}
-      `);
-      const el = layer.getElement?.() ?? layer._path;
-      if(el) el.setAttribute('tabindex', '0');
+    // Opprett en Layer Control for å kunne skru av/på lag
+    const layerControl = L.control.layers(null, null).addTo(map);
+
+    // Add loading indicator
+    const loadingIndicator = L.control({ position: 'topright' });
+    loadingIndicator.onAdd = () => {
+      const div = L.DomUtil.create('div', 'loading-indicator');
+      div.innerHTML = 'Laster flomsoner...';
+      div.style.background = 'white';
+      div.style.padding = '5px';
+      div.style.borderRadius = '3px';
+      return div;
+    };
+    loadingIndicator.addTo(map);
+
+    // Load flood zones
+    try {
+      const elvbekkLayer = await getElvbekkLayer(map);
+      console.log('Elvbekk layer loaded:', elvbekkLayer);
+      layerControl.addOverlay(elvbekkLayer, 'Elvbekk');
+      elvbekkLayer.addTo(map);
+    } catch (error) {
+      console.error('Error loading Elvbekk layer:', error);
     }
-  }).addTo(map);
-
-  // UI setup
-  addLegend(map);
-  setupFilters(geojsonLayer);
-  setupSearch(map, geojsonLayer);
-  setupSidebar(data, geojsonLayer, map);
+  } catch (error) {
+    console.error('Error initializing map:', error);
+  }
 })();
