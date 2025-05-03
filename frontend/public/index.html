@@ -29,26 +29,17 @@
   />
 </head>
 <body>
-  <header class="app-header">
-    <h1>Flomvarsel</h1>
-    <div id="controls">
+
+  <div id="sokefelt">
+
+  </div>
+
+  <div id="sidebar">
+        <div id="controls">
       <label><input type="checkbox" id="filterR" checked> Vis røde soner</label>
       <label><input type="checkbox" id="filterG" checked> Vis gule soner</label>
     </div>
-  </header>
 
-  <aside id="sidebar">
-    <section id="search-panel">
-      <h2>Søk</h2>
-      <input
-        type="search"
-        id="searchInput"
-        class="search-field"
-        placeholder="Søk etter lokalId"
-        aria-label="Søk etter lokalId"
-      />
-      <button id="searchBtn" class="search-button">Søk</button>
-    </section>
 
     <section id="tools-panel">
       <h2>Verktøy</h2>
@@ -59,7 +50,7 @@
       <h2>Statistikk</h2>
       <p>Antall soner: <span id="stats-count">–</span></p>
     </section>
-  </aside>
+  </div>
 
   <div id="map"></div>
 
