@@ -1,6 +1,7 @@
 import { initMap } from './maps/mapInit.js';
 import { CompassControl } from './components/kompass.js';
 import {  getElvbekkLayer } from './layers/elvbekk.js';
+import { initWarningControl } from './components/warningControl.js';
 
 (async () => {
   try {
@@ -28,6 +29,7 @@ import {  getElvbekkLayer } from './layers/elvbekk.js';
       console.log('Elvbekk layer loaded:', elvbekkLayer);
       layerControl.addOverlay(elvbekkLayer, 'Elvbekk');
       elvbekkLayer.addTo(map);
+      await initWarningControl(map);
     } catch (error) {
       console.error('Error loading Elvbekk layer:', error);
     }

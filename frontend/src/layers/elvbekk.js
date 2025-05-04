@@ -1,4 +1,4 @@
-import { supabaseClient } from '../../../backend/supabase/supabaseClient.js';
+import { supabaseClient } from '../../../backend/config.js';
 
 /**
  * Returns a color for an elvbekk segment based on its recurrence interval.
