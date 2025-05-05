@@ -14,7 +14,7 @@ export async function initWarningControl(map) {
   const warningControl = L.control({ position: 'bottomleft' });
   warningControl.onAdd = () => {
     const div = L.DomUtil.create('div', 'warning-control');
-    div.innerHTML = '<h4>Flomvarsler</h4><ul id="warningList"><li>Laster...</li></ul>';
+    div.innerHTML = '<h4></h4><ul id="warningList"><li>Laster...</li></ul>';
     return div;
   };
   warningControl.addTo(map);
@@ -67,7 +67,7 @@ export async function initWarningControl(map) {
       const warningList = document.getElementById('warningList');
       warningList.innerHTML = '';
       if (agderWarnings.length === 0) {
-        warningList.innerHTML = '<li>Ingen aktive flomvarsler for Agder</li>';
+        warningList.innerHTML = '<li></li>';
       } else {
         agderWarnings.forEach(w => {
           const li = document.createElement('li');
