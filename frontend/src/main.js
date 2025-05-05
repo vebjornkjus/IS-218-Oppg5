@@ -10,7 +10,7 @@ import { initWarningControl } from './components/warningControl.js';
 
     // Legg til målestokk
     L.control.scale({
-      position: 'bottomleft', // Plassering av målestokken
+      position: 'bottomright', // Plassering av målestokken
       imperial: false,        // Kun metrisk system
       maxWidth: 200           // Maks bredde på målestokken
     }).addTo(map);
