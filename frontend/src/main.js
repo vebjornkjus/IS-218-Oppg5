@@ -2,6 +2,7 @@ import { initMap } from './maps/mapInit.js';
 import { CompassControl } from './components/kompass.js';
 import {  getElvbekkLayer } from './layers/elvbekk.js';
 import { initWarningControl } from './components/warningControl.js';
+import { addScaleControl } from './components/scaleControl.js'; 
 
 (async () => {
   try {
@@ -9,11 +10,7 @@ import { initWarningControl } from './components/warningControl.js';
     map.addControl(new CompassControl());
 
     // Legg til målestokk
-    L.control.scale({
-      position: 'bottomright', // Plassering av målestokken
-      imperial: false,        // Kun metrisk system
-      maxWidth: 200           // Maks bredde på målestokken
-    }).addTo(map);
+    addScaleControl(map);
 
     // Opprett en Layer Control for å kunne skru av/på lag
     const layerControl = L.control.layers(null, null).addTo(map);
