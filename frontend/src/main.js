@@ -8,7 +8,12 @@ import { addScaleControl } from './components/scaleControl.js';
   try {
     const map = initMap();
     map.addControl(new CompassControl());
-
+    
+    L.Control.geocoder({
+      defaultMarkGeocode: true
+  })
+  .addTo(map);
+  
     // Legg til målestokk
     addScaleControl(map);
 
