@@ -37,7 +37,7 @@ export function initMap() {
       layers: "hoydekurver_5m,hoydekurver_1m,hoydepunkt",
       attribution: "© Kartverket / Geonorge"
     }
-  );
+  ).addTo(map);
   
   // --------------------------------------------------
   // NVE - Flood susceptibility layers
@@ -94,13 +94,13 @@ export function initMap() {
   });
   
   // --------------------------------------------------
-  // Layer control - organized in a single control panel
+  // Custom layer controls in the sidebar
   // --------------------------------------------------
-  L.control.layers(
-    { 
-      "OpenStreetMap": osmBaseLayer 
+  createCustomLayerControls({
+    baseMaps: {
+      "OpenStreetMap": osmBaseLayer
     },
-    {
+    overlayMaps: {
       "Høydekurver (Kartverket)": hoydekurveLayer,
       "Flom – Aktsomhetsområder": flomAktsomhetLayer,
       "Flom – Dekning": dekningsLayer,
@@ -110,8 +110,59 @@ export function initMap() {
       "Flomsone 200‑års + klima": flomsone200K,
       "Flomsone 500‑års": flomsone500
     },
-    { collapsed: false }
-  ).addTo(map);
+    map: map
+  });
   
   return map;
+}
+
+// Function to create custom layer controls in the sidebar
+function createCustomLayerControls(options) {
+  const sidebar = document.getElementById('sidebar');
+  
+  // Create container for the controls
+  const controlContainer = document.createElement('div');
+  controlContainer.className = 'custom-layer-control';
+  
+  // Overlay maps section
+  if (Object.keys(options.overlayMaps).length > 0) {
+    const overlaySection = document.createElement('div');
+    overlaySection.className = 'layer-group';
+    
+    const overlayTitle = document.createElement('h4');
+    overlayTitle.textContent = 'Kartlag';
+    overlaySection.appendChild(overlayTitle);
+    
+    // Create checkboxes for overlay maps
+    Object.entries(options.overlayMaps).forEach(([name, layer]) => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'layer-item';
+      
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.id = `overlay-${name.replace(/\s+/g, '-').toLowerCase()}`;
+      input.checked = options.map.hasLayer(layer);
+      
+      const label = document.createElement('label');
+      label.htmlFor = input.id;
+      label.textContent = name;
+      
+      input.addEventListener('change', () => {
+        if (input.checked) {
+          options.map.addLayer(layer);
+        } else {
+          options.map.removeLayer(layer);
+        }
+      });
+      
+      itemDiv.appendChild(input);
+      itemDiv.appendChild(label);
+      overlaySection.appendChild(itemDiv);
+    });
+    
+    controlContainer.appendChild(overlaySection);
+  }
+  
+  // Add the control container to the sidebar
+  sidebar.appendChild(controlContainer);
 }
