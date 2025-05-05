@@ -8,6 +8,13 @@ import { initWarningControl } from './components/warningControl.js';
     const map = initMap();
     map.addControl(new CompassControl());
 
+    // Legg til målestokk
+    L.control.scale({
+      position: 'bottomleft', // Plassering av målestokken
+      imperial: false,        // Kun metrisk system
+      maxWidth: 200           // Maks bredde på målestokken
+    }).addTo(map);
+
     // Opprett en Layer Control for å kunne skru av/på lag
     const layerControl = L.control.layers(null, null).addTo(map);
 
