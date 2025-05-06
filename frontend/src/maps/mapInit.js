@@ -288,6 +288,14 @@ export function initMap() {
 function createCustomLayerControls(options) {
   const sidebar = document.getElementById('sidebar');
   
+  // Add collapse functionality
+  const collapseBtn = document.getElementById('collapse-sidebar');
+  collapseBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    // Oppdater kartet for å reflektere endringen
+    options.map.invalidateSize();
+  });
+
   // Create container for the controls
   const controlContainer = document.createElement('div');
   controlContainer.className = 'custom-layer-control';

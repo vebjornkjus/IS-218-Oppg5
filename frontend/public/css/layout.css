@@ -26,6 +26,41 @@ body {
   width: 250px; /* Fixed width */
   max-height: 400px; /* Limit height */
   border-radius: 16px; /* Rounded corners */
+  transition: transform 0.3s ease;
+}
+
+#sidebar.collapsed {
+  transform: translateX(-94%); /* Lar litt av sidebar være synlig */
+}
+
+.collapse-btn {
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;  /* Add this to prevent stretching */
+  min-height: 30px; /* Add this to prevent stretching */
+  padding: 0;       /* Add this to remove any padding */
+  background: lightgrey;
+  border: 1px solid rgba(47, 47, 47, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  font-size: 18px;  /* Add this to control icon size */
+}
+
+.collapse-btn:hover {
+  background: #f0f0f0;
+}
+
+/* Roter ikonet når sidebar er kollapset */
+.collapsed .collapse-btn::after {
+  transform: rotate(180deg);
 }
 
 #sidebar h2 {
@@ -34,7 +69,8 @@ body {
   color: var(--color-primary);
 }
 
-#sidebar button {
+/* Endre den eksisterende #sidebar button regelen til å være mer spesifikk */
+#sidebar button:not(.collapse-btn) {
   display: block;
   width: 100%;
   margin-top: 0.5rem;
