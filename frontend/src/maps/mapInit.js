@@ -48,7 +48,7 @@ export function initMap() {
     ...wmsCommonOptions,
     layers: "Flom_aktsomhetsomrade",
     attribution: "© NVE"
-  }).addTo(map);
+  });
   
   const dekningsLayer = L.tileLayer.wms(aktsomhetUrl, {
     ...wmsCommonOptions,
@@ -72,108 +72,76 @@ export function initMap() {
     attribution: "© NVE"
   };
   
-  // 10-års flomsone
-  const flomsone10 = L.tileLayer.wms(flomsonerUrl, {
-    ...flomsonerOptions,
-    layers: "Flomsone_10arsflom",
-    zIndex: 12
-  });
+  // Define all flood zone layers
+  const floodZoneLayers = {
+    10: L.tileLayer.wms(flomsonerUrl, {
+      ...flomsonerOptions,
+      layers: "Flomsone_10arsflom",
+      zIndex: 12
+    }),
+    20: L.tileLayer.wms(flomsonerUrl, {
+      ...flomsonerOptions,
+      layers: "Flomsone_20arsflom",
+      zIndex: 11
+    }),
+    50: L.tileLayer.wms(flomsonerUrl, {
+      ...flomsonerOptions,
+      layers: "Flomsone_50arsflom",
+      zIndex: 10.5
+    }),
+    100: L.tileLayer.wms(flomsonerUrl, {
+      ...flomsonerOptions,
+      layers: "Flomsone_100arsflom",
+      zIndex: 10
+    }),
+    200: L.tileLayer.wms(flomsonerUrl, {
+      ...flomsonerOptions,
+      layers: "Flomsone_200arsflom",
+      zIndex: 9
+    }),
+    500: L.tileLayer.wms(flomsonerUrl, {
+      ...flomsonerOptions,
+      layers: "Flomsone_500arsflom",
+      zIndex: 7
+    }),
+    1000: L.tileLayer.wms(flomsonerUrl, {
+      ...flomsonerOptions,
+      layers: "Flomsone_1000arsflom",
+      zIndex: 6
+    })
+  };
   
-  // 20-års flomsone
-  const flomsone20 = L.tileLayer.wms(flomsonerUrl, {
-    ...flomsonerOptions,
-    layers: "Flomsone_20arsflom",
-    zIndex: 11
-  });
-  
-  // 50-års flomsone
-  const flomsone50 = L.tileLayer.wms(flomsonerUrl, {
-    ...flomsonerOptions,
-    layers: "Flomsone_50arsflom",
-    zIndex: 10.5
-  });
-  
-  // 100-års flomsone
-  const flomsone100 = L.tileLayer.wms(flomsonerUrl, {
-    ...flomsonerOptions,
-    layers: "Flomsone_100arsflom",
-    zIndex: 10
-  }).addTo(map);
-  
-  // 200-års flomsone
-  const flomsone200 = L.tileLayer.wms(flomsonerUrl, {
-    ...flomsonerOptions,
-    layers: "Flomsone_200arsflom",
-    zIndex: 9
-  });
-  
-  // 500-års flomsone
-  const flomsone500 = L.tileLayer.wms(flomsonerUrl, {
-    ...flomsonerOptions,
-    layers: "Flomsone_500arsflom",
-    zIndex: 7
-  });
-  
-  // 1000-års flomsone
-  const flomsone1000 = L.tileLayer.wms(flomsonerUrl, {
-    ...flomsonerOptions,
-    layers: "Flomsone_1000arsflom",
-    zIndex: 6
-  });
+  // Add 100-year flood zone as default
+  floodZoneLayers[100].addTo(map);
 
   // --------------------------------------------------
   // GeoJSON flood building layers
   // --------------------------------------------------
   // Hash for bbox - må matche det som brukes i Python-skriptet
-  const bboxHash = "6ed2263c"; // Dette må du tilpasse til din faktiske hash
+  const bboxHash = "fdd7a59a"; // Update to match your Norway hash
   
   // URLs for de forskjellige flomperiodene
   const floodUrls = {
-    10: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/agdertest/osm_buildings_flood_10yr_${bboxHash}.geojson`,
-    20: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/agder2//osm_buildings_flood_20yr_6ed2263c.geojson`,
-    50: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/agder2//osm_buildings_flood_50yr_6ed2263c.geojson`,
-    100: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/agdertest/osm_buildings_flood_100yr_${bboxHash}.geojson`,
-    200: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/agder2/osm_buildings_flood_200yr_${bboxHash}.geojson`,
-    500: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/agder2/osm_buildings_flood_500yr_${bboxHash}.geojson`,
-    1000: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/agder2/osm_buildings_flood_1000yr_${bboxHash}.geojson`,
-    aktsomhet: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/agder2/osm_buildings_flood_aktsomhetyr_${bboxHash}.geojson`
+    10: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_10yr_${bboxHash}.geojson`,
+    20: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_20yr_${bboxHash}.geojson`,
+    50: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_50yr_${bboxHash}.geojson`,
+    100: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_100yr_${bboxHash}.geojson`,
+    200: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_200yr_${bboxHash}.geojson`,
+    500: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_500yr_${bboxHash}.geojson`,
+    1000: `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_1000yr_${bboxHash}.geojson`,
+    // Note: aktsomhet is handled separately since it's split into 4 files
   };
   
-  // Tomme placeholders for GeoJSON-lag, disse blir fylt senere
-  let buildings10Layer, buildings20Layer, buildings50Layer, buildings100Layer, 
-      buildings200Layer, buildings500Layer, buildings1000Layer, buildingsAktsomhetLayer;
+  // URLs for the 4 split aktsomhet files
+  const aktsomhetUrls = [
+    `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_aktsomhetyr_${bboxHash}_part1of4.geojson`,
+    `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_aktsomhetyr_${bboxHash}_part2of4.geojson`,
+    `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_aktsomhetyr_${bboxHash}_part3of4.geojson`,
+    `https://emefguxbwcvfxaiywmri.supabase.co/storage/v1/object/public/flombyggninger/osm_buildings_flood_aktsomhetyr_${bboxHash}_part4of4.geojson`
+  ];
   
-  // Last inn alle bygningslag asynkront
-  const promises = [];
-  
-  // Funksjon for å laste inn et GeoJSON-lag
-  function loadBuildingsLayer(url, periodOrType) {
-    return fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        // Opprett GeoJSON-lag med stil som varierer litt med periode/type
-        const buildingsLayer = L.geoJSON(data, {
-          style: getStyleForPeriodOrType(periodOrType),
-          onEachFeature: (feat, layer) => {
-            // Format popup basert på om det er en flomperiode eller aktsomhetsområde
-            const popupText = periodOrType === 'aktsomhet' 
-              ? `Bygg OSM-id: ${feat.properties.osm_id}<br>Flomaktsomhetsområde`
-              : `Bygg OSM-id: ${feat.properties.osm_id}<br>Flomsone: ${periodOrType}-årsflom`;
-            
-            layer.bindPopup(popupText);
-          }
-        });
-        
-        return { periodOrType, layer: buildingsLayer };
-      })
-      .catch(err => {
-        console.warn(`Kunne ikke laste bygninger for ${periodOrType}:`, err);
-        return { periodOrType, layer: null };
-      });
-  }
+  // Store for building layers
+  const buildingLayers = {};
   
   // Funksjon for å gi forskjellige stiler basert på flomperiode/type
   function getStyleForPeriodOrType(periodOrType) {
@@ -190,92 +158,152 @@ export function initMap() {
     return styles[periodOrType] || styles[100]; // Default til 100-års stil
   }
   
-  // Last inn alle lag og håndter dem når de er klare
-  for (const [periodOrType, url] of Object.entries(floodUrls)) {
-    promises.push(loadBuildingsLayer(url, periodOrType === 'aktsomhet' ? periodOrType : parseInt(periodOrType)));
+  // Function to load regular building layers
+  function loadBuildingsLayer(url, periodOrType) {
+    return fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        // Opprett GeoJSON-lag med stil som varierer litt med periode/type
+        const buildingsLayer = L.geoJSON(data, {
+          style: getStyleForPeriodOrType(periodOrType),
+          onEachFeature: (feat, layer) => {
+            // Format popup basert på om det er en flomperiode eller aktsomhetsområde
+            const popupText = `Bygg OSM-id: ${feat.properties.osm_id}<br>Flomsone: ${periodOrType}-årsflom`;
+            layer.bindPopup(popupText);
+          }
+        });
+        
+        return { periodOrType, layer: buildingsLayer };
+      })
+      .catch(err => {
+        console.warn(`Kunne ikke laste bygninger for ${periodOrType}:`, err);
+        return { periodOrType, layer: null };
+      });
   }
   
-  Promise.all(promises)
-    .then(results => {
-      // Oppsett for hvert lag
-      results.forEach(result => {
-        if (!result.layer) return; // Hopp over lag som feilet
-        
-        const { periodOrType, layer } = result;
-        
-        // Lagre lagene i de rette variablene og knytt til tilsvarende flomsoner
-        if (periodOrType === 'aktsomhet') {
-          buildingsAktsomhetLayer = layer;
-          // Knytt til flomAktsomhetLayer
-          flomAktsomhetLayer.on('add', () => map.addLayer(layer));
-          flomAktsomhetLayer.on('remove', () => map.removeLayer(layer));
-          // Siden flomAktsomhetLayer er synlig ved start, legg til bygningslaget også
-          if (map.hasLayer(flomAktsomhetLayer)) map.addLayer(layer);
-        } else {
-          // For numeriske perioder
-          switch (periodOrType) {
-            case 10: 
-              buildings10Layer = layer; 
-              flomsone10.on('add', () => map.addLayer(layer));
-              flomsone10.on('remove', () => map.removeLayer(layer));
-              break;
-            case 20: 
-              buildings20Layer = layer; 
-              flomsone20.on('add', () => map.addLayer(layer));
-              flomsone20.on('remove', () => map.removeLayer(layer));
-              break;
-            case 50: 
-              buildings50Layer = layer; 
-              flomsone50.on('add', () => map.addLayer(layer));
-              flomsone50.on('remove', () => map.removeLayer(layer));
-              break;
-            case 100: 
-              buildings100Layer = layer; 
-              flomsone100.on('add', () => map.addLayer(layer));
-              flomsone100.on('remove', () => map.removeLayer(layer));
-              // Siden flomsone100 er synlig ved start, legg til bygningslaget også
-              if (map.hasLayer(flomsone100)) map.addLayer(layer);
-              break;
-            case 200: 
-              buildings200Layer = layer; 
-              flomsone200.on('add', () => map.addLayer(layer));
-              flomsone200.on('remove', () => map.removeLayer(layer));
-              break;
-            case 500: 
-              buildings500Layer = layer; 
-              flomsone500.on('add', () => map.addLayer(layer));
-              flomsone500.on('remove', () => map.removeLayer(layer));
-              break;
-            case 1000: 
-              buildings1000Layer = layer; 
-              flomsone1000.on('add', () => map.addLayer(layer));
-              flomsone1000.on('remove', () => map.removeLayer(layer));
-              break;
-          }
+  // Function to load and combine all 4 aktsomhet files
+  async function loadAktsomhetLayers() {
+    console.log('Loading 4 split aktsomhet files...');
+    
+    try {
+      // Load all 4 files in parallel
+      const promises = aktsomhetUrls.map((url, index) => {
+        console.log(`Loading aktsomhet part ${index + 1}/4...`);
+        return fetch(url)
+          .then(res => {
+            if (!res.ok) throw new Error(`HTTP error ${res.status} for part ${index + 1}`);
+            return res.json();
+          })
+          .catch(err => {
+            console.warn(`Failed to load aktsomhet part ${index + 1}:`, err);
+            return null;
+          });
+      });
+      
+      // Wait for all files to load
+      const results = await Promise.all(promises);
+      
+      // Combine all features from successful loads
+      const allFeatures = [];
+      results.forEach((data, index) => {
+        if (data && data.features) {
+          console.log(`Aktsomhet part ${index + 1} loaded: ${data.features.length} features`);
+          allFeatures.push(...data.features);
         }
       });
       
-      // Opprett overlay-kart for sidebar
+      console.log(`Total aktsomhet features loaded: ${allFeatures.length}`);
+      
+      // Create combined GeoJSON
+      const combinedData = {
+        type: "FeatureCollection",
+        features: allFeatures
+      };
+      
+      // Create the layer with combined data
+      const buildingsLayer = L.geoJSON(combinedData, {
+        style: getStyleForPeriodOrType('aktsomhet'),
+        onEachFeature: (feat, layer) => {
+          const popupText = `Bygg OSM-id: ${feat.properties.osm_id}<br>Flomaktsomhetsområde`;
+          layer.bindPopup(popupText);
+        }
+      });
+      
+      return { periodOrType: 'aktsomhet', layer: buildingsLayer };
+      
+    } catch (err) {
+      console.error('Error loading aktsomhet layers:', err);
+      return { periodOrType: 'aktsomhet', layer: null };
+    }
+  }
+  
+  // Load all building layers
+  async function loadAllBuildingLayers() {
+    const promises = [];
+    
+    // Load regular flood zones
+    for (const [periodOrType, url] of Object.entries(floodUrls)) {
+      promises.push(loadBuildingsLayer(url, parseInt(periodOrType)));
+    }
+    
+    // Load and combine aktsomhet files
+    promises.push(loadAktsomhetLayers());
+    
+    return Promise.all(promises);
+  }
+  
+  // Load all building layers and set up the map
+  loadAllBuildingLayers()
+    .then(results => {
+      console.log('All building layers loaded');
+      
+      // Store all building layers
+      results.forEach(result => {
+        if (!result.layer) return; // Skip failed layers
+        
+        const { periodOrType, layer } = result;
+        buildingLayers[periodOrType] = layer;
+        
+        // Log the number of features in each layer
+        if (layer && layer.getLayers) {
+          console.log(`${periodOrType}: ${layer.getLayers().length} features`);
+        }
+      });
+      
+      // Add 100-year building layer as default
+      if (buildingLayers[100]) {
+        map.addLayer(buildingLayers[100]);
+      }
+      
+      // Set up aktsomhet layer events
+      if (buildingLayers['aktsomhet']) {
+        flomAktsomhetLayer.on('add', () => {
+          map.addLayer(buildingLayers['aktsomhet']);
+          console.log('Aktsomhet layer added to map');
+        });
+        flomAktsomhetLayer.on('remove', () => {
+          map.removeLayer(buildingLayers['aktsomhet']);
+          console.log('Aktsomhet layer removed from map');
+        });
+      }
+      
+      // Create overlay maps for other non-sliding layers
       const overlayMaps = {
         'Høydekurver (Kartverket)': hoydekurveLayer,
         'Flom – Aktsomhetsområder': flomAktsomhetLayer,
         'Flom – Dekning': dekningsLayer,
-        'Maksimal vannstandsstigning': vannstandLayer,
-        'Flomsone 10-års': flomsone10,
-        'Flomsone 20-års': flomsone20,
-        'Flomsone 50-års': flomsone50,
-        'Flomsone 100-års': flomsone100,
-        'Flomsone 200-års': flomsone200,
-        'Flomsone 500-års': flomsone500,
-        'Flomsone 1000-års': flomsone1000
-        // Merk: Vi inkluderer ikke bygningslagene direkte i kontrollene 
-        // fordi de håndteres via event listeners på flomsonene
+        'Maksimal vannstandsstigning': vannstandLayer
       };
       
-      // Opprett sidebar-kontroller
+      // Create custom controls with slider
       createCustomLayerControls({
         baseMaps: { 'OpenStreetMap': osmBaseLayer },
         overlayMaps,
+        floodZoneLayers,
+        buildingLayers,
         map
       });
     })
@@ -284,7 +312,7 @@ export function initMap() {
   return map;
 }
 
-// Function to create custom layer controls in the sidebar
+// Function to create custom layer controls in the sidebar with slider
 function createCustomLayerControls(options) {
   const sidebar = document.getElementById('sidebar');
   
@@ -300,7 +328,7 @@ function createCustomLayerControls(options) {
   const controlContainer = document.createElement('div');
   controlContainer.className = 'custom-layer-control';
   
-  // Overlay maps section
+  // Non-sliding overlay maps section
   if (Object.keys(options.overlayMaps).length > 0) {
     const overlaySection = document.createElement('div');
     overlaySection.className = 'layer-group';
@@ -339,6 +367,165 @@ function createCustomLayerControls(options) {
     controlContainer.appendChild(overlaySection);
   }
   
+  // Flood zone slider section
+  const floodSection = document.createElement('div');
+  floodSection.className = 'layer-group flood-slider-group';
+  
+  const floodTitle = document.createElement('h4');
+  floodTitle.textContent = 'Flomsoner';
+  floodSection.appendChild(floodTitle);
+  
+  // Checkbox to toggle flood zones visibility
+  const showFloodZoneDiv = document.createElement('div');
+  showFloodZoneDiv.className = 'layer-item';
+  
+  const showFloodZoneCheckbox = document.createElement('input');
+  showFloodZoneCheckbox.type = 'checkbox';
+  showFloodZoneCheckbox.id = 'show-flood-zones';
+  showFloodZoneCheckbox.checked = true; // Initially checked as 100-year is shown by default
+  
+  const showFloodZoneLabel = document.createElement('label');
+  showFloodZoneLabel.htmlFor = 'show-flood-zones';
+  showFloodZoneLabel.textContent = 'Vis flomsoner';
+  
+  showFloodZoneDiv.appendChild(showFloodZoneCheckbox);
+  showFloodZoneDiv.appendChild(showFloodZoneLabel);
+  floodSection.appendChild(showFloodZoneDiv);
+  
+  // Create slider container
+  const sliderContainer = document.createElement('div');
+  sliderContainer.className = 'slider-container';
+  
+  // Current year display
+  const currentYearDiv = document.createElement('div');
+  currentYearDiv.className = 'current-year';
+  currentYearDiv.textContent = '100-års flomsone';
+  sliderContainer.appendChild(currentYearDiv);
+  
+  // Create slider
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = '0';
+  slider.max = '6';
+  slider.value = '3'; // Default to 100-year (index 3)
+  slider.className = 'flood-slider';
+  
+  // Map slider values to flood years
+  const sliderValueMap = {
+    '0': 10,
+    '1': 20,
+    '2': 50,
+    '3': 100,
+    '4': 200,
+    '5': 500,
+    '6': 1000
+  };
+  
+  // Current active flood zone and building layer
+  let currentFloodYear = 100;
+  
+  // Function to update layers based on slider
+  function updateFloodZones() {
+    // Get the selected flood year from the slider value
+    const newFloodYear = sliderValueMap[slider.value];
+    
+    // If flood zones should be shown
+    if (showFloodZoneCheckbox.checked) {
+      // Remove the current flood zone and building layer
+      if (options.floodZoneLayers[currentFloodYear]) {
+        options.map.removeLayer(options.floodZoneLayers[currentFloodYear]);
+      }
+      if (options.buildingLayers[currentFloodYear]) {
+        options.map.removeLayer(options.buildingLayers[currentFloodYear]);
+      }
+      
+      // Add the new flood zone and building layer
+      if (options.floodZoneLayers[newFloodYear]) {
+        options.map.addLayer(options.floodZoneLayers[newFloodYear]);
+      }
+      if (options.buildingLayers[newFloodYear]) {
+        options.map.addLayer(options.buildingLayers[newFloodYear]);
+      }
+    }
+    
+    // Update current flood year
+    currentFloodYear = newFloodYear;
+    
+    // Update the display text
+    currentYearDiv.textContent = `${newFloodYear}-års flomsone`;
+  }
+  
+  // Function to toggle flood zone visibility
+  function toggleFloodZones() {
+    if (showFloodZoneCheckbox.checked) {
+      // Show the current flood zone and building layer
+      if (options.floodZoneLayers[currentFloodYear]) {
+        options.map.addLayer(options.floodZoneLayers[currentFloodYear]);
+      }
+      if (options.buildingLayers[currentFloodYear]) {
+        options.map.addLayer(options.buildingLayers[currentFloodYear]);
+      }
+      // Enable the slider
+      slider.disabled = false;
+    } else {
+      // Hide the current flood zone and building layer
+      if (options.floodZoneLayers[currentFloodYear]) {
+        options.map.removeLayer(options.floodZoneLayers[currentFloodYear]);
+      }
+      if (options.buildingLayers[currentFloodYear]) {
+        options.map.removeLayer(options.buildingLayers[currentFloodYear]);
+      }
+      // Disable the slider
+      slider.disabled = true;
+    }
+  }
+  
+  // Add event listeners
+  slider.addEventListener('input', updateFloodZones);
+  showFloodZoneCheckbox.addEventListener('change', toggleFloodZones);
+  
+  // Add slider to container
+  sliderContainer.appendChild(slider);
+  
+  // Create a legend for the flood years
+  const sliderLegend = document.createElement('div');
+  sliderLegend.className = 'slider-legend';
+  
+  const minYear = document.createElement('span');
+  minYear.className = 'slider-min';
+  minYear.textContent = '10 år';
+  
+  const maxYear = document.createElement('span');
+  maxYear.className = 'slider-max';
+  maxYear.textContent = '1000 år';
+  
+  sliderLegend.appendChild(minYear);
+  sliderLegend.appendChild(maxYear);
+  
+  sliderContainer.appendChild(sliderLegend);
+  floodSection.appendChild(sliderContainer);
+  
+  // Add the flood section to the control container
+  controlContainer.appendChild(floodSection);
+  
   // Add the control container to the sidebar
   sidebar.appendChild(controlContainer);
+  
+  // Add CSS styles for the slider
+  const style = document.createElement('style');
+  style.textContent = `
+    .flood-slider-group { margin-top: 20px; }
+    .slider-container { margin-top: 10px; padding: 0 5px; }
+    .current-year { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+    .flood-slider { width: 100%; }
+    .slider-legend { display: flex; justify-content: space-between; font-size: 12px; margin-top: 3px; }
+    .slider-min, .slider-max { color: #666; }
+    #sidebar.collapsed { width: 50px; }
+    #sidebar.collapsed .custom-layer-control { display: none; }
+    .collapse-btn { position: absolute; top: 10px; right: 10px; z-index: 1001; 
+                   background: #fff; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px; 
+                   width: 40px !important; height: 40px; font-size: 18px; line-height: 1; 
+                   padding: 0; cursor: pointer; text-align: center; }
+  `;
+  document.head.appendChild(style);
 }
