@@ -1,3 +1,5 @@
 .qodo
 data/raw/Flomsoner/*.gml
 .env
+.env.local
+.env.production
