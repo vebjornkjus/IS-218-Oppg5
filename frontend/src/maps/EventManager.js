@@ -15,9 +15,28 @@ export class EventManager {
       this.buildingManager.debouncedLoadBuildings();
     });
     
+    // Handle zoom with immediate action for low zoom levels
     this.map.on('zoomend', () => {
-      console.log('🔍 Map zoomend event');
-      this.buildingManager.debouncedLoadBuildings();
+      const zoom = this.map.getZoom();
+      console.log('🔍 Map zoomend event, zoom:', zoom);
+      
+      // If zoom is too low, immediately remove buildings without debounce
+      if (zoom <= 12) {
+        console.log('🚫 Low zoom detected, removing buildings immediately');
+        this.buildingManager.removeAllBuildings();
+      } else {
+        // For higher zoom levels, use debounced loading
+        this.buildingManager.debouncedLoadBuildings();
+      }
+    });
+    
+    // Also listen to zoom events for immediate feedback
+    this.map.on('zoom', () => {
+      const zoom = this.map.getZoom();
+      // During zoom animation, if going below threshold, start removing buildings
+      if (zoom <= 12) {
+        this.buildingManager.removeAllBuildings();
+      }
     });
     
     // Initial building load if zoom is high enough

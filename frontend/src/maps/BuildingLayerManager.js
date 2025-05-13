@@ -1,18 +1,174 @@
-// frontend/src/maps/BuildingLayerManager.js - FIXED version
+// frontend/src/maps/BuildingLayerManager.js
 
-import { SUPABASE_CONFIG } from '../config/app.js';
-
-export class BuildingLayerManager {
-  constructor(map, stateManager) {
+export class SimplifiedBuildingManager {
+  constructor(map, supabaseConfig) {
     this.map = map;
-    this.stateManager = stateManager;
+    this.supabaseConfig = supabaseConfig;
     
-    // Debounce timeout for loading
-    this.loadBuildingsTimeout = null;
+    // Enkel state
+    this.floodBuildings = null;
+    this.aktsomhetBuildings = null;
+    this.currentFloodYear = 100;
+    this.showFloodZones = false;
+    this.cache = new Map();
+    
+    // Single update timeout
+    this.updateTimeout = null;
+    
+    this.setupEvents();
   }
   
-  // Get style for different flood periods
-  getStyleForPeriod(periodOrType) {
+  // SINGLE update function with adaptive timing
+  scheduleUpdate(eventType = 'default') {
+    clearTimeout(this.updateTimeout);
+    
+    // Different delays for different types of events
+    let delay = 150;
+    if (eventType === 'slider') {
+      delay = 100; // Faster for slider input
+    } else if (eventType === 'zoom') {
+      delay = 50;  // Immediate for zoom
+    }
+    
+    this.updateTimeout = setTimeout(() => {
+      this.updateBuildings();
+    }, delay);
+  }
+  
+  // Main logic - decide what should be shown
+  async updateBuildings() {
+    const zoom = this.map.getZoom();
+    const showFloodZones = this.getShowFloodZones();
+    const showAktsomhet = this.getShowAktsomhet();
+    
+    console.log('🔄 Update buildings:', { zoom, showFloodZones, showAktsomhet });
+    
+    // Remove everything if zoom is too low
+    if (zoom <= 12) {
+      this.clearAllBuildings();
+      return;
+    }
+    
+    // Handle flood buildings
+    if (showFloodZones) {
+      await this.loadFloodBuildings();
+    } else {
+      this.clearFloodBuildings();
+    }
+    
+    // Handle aktsomhet buildings
+    if (showAktsomhet) {
+      await this.loadAktsomhetBuildings();
+    } else {
+      this.clearAktsomhetBuildings();
+    }
+  }
+  
+  // Simple state getters
+  getShowFloodZones() {
+    const checkbox = document.getElementById('show-flood-zones');
+    return checkbox && checkbox.checked;
+  }
+  
+  getShowAktsomhet() {
+    const checkbox = document.getElementById('overlay-flomAktsomhet');
+    return checkbox && checkbox.checked;
+  }
+  
+  getCurrentFloodYear() {
+    // Read from slider
+    const slider = document.querySelector('.flood-slider');
+    if (!slider) return 100;
+    
+    const valueMap = { '0': 10, '1': 20, '2': 50, '3': 100, '4': 200, '5': 500, '6': 1000 };
+    return valueMap[slider.value] || 100;
+  }
+  
+  // Building loading functions
+  async loadFloodBuildings() {
+    const floodYear = this.getCurrentFloodYear();
+    const cacheKey = this.getCacheKey(floodYear);
+    
+    // Check cache
+    if (this.cache.has(cacheKey)) {
+      this.setFloodBuildings(this.cache.get(cacheKey));
+      return;
+    }
+    
+    // Load from database
+    try {
+      const buildings = await this.fetchBuildings(floodYear);
+      if (buildings) {
+        this.cache.set(cacheKey, buildings);
+        this.setFloodBuildings(buildings);
+      }
+    } catch (error) {
+      console.error('Error loading flood buildings:', error);
+    }
+  }
+  
+  async loadAktsomhetBuildings() {
+    const cacheKey = this.getCacheKey(-1);
+    
+    // Check cache
+    if (this.cache.has(cacheKey)) {
+      this.setAktsomhetBuildings(this.cache.get(cacheKey));
+      return;
+    }
+    
+    // Load from database
+    try {
+      const buildings = await this.fetchBuildings(-1);
+      if (buildings) {
+        this.cache.set(cacheKey, buildings);
+        this.setAktsomhetBuildings(buildings);
+      }
+    } catch (error) {
+      console.error('Error loading aktsomhet buildings:', error);
+    }
+  }
+  
+  // Database fetch
+  async fetchBuildings(floodPeriod) {
+    const bounds = this.map.getBounds();
+    const bbox = [
+      bounds.getSouthWest().lng,
+      bounds.getSouthWest().lat,
+      bounds.getNorthEast().lng,
+      bounds.getNorthEast().lat
+    ];
+    
+    const response = await fetch(`${this.supabaseConfig.url}/rest/v1/rpc/get_buildings_in_bbox`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': this.supabaseConfig.anonKey,
+        'Authorization': `Bearer ${this.supabaseConfig.anonKey}`
+      },
+      body: JSON.stringify({
+        bbox_coords: bbox,
+        flood_period: floodPeriod
+      })
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    
+    if (!data || !data.features) return null;
+    
+    // Create layer
+    return L.geoJSON(data, {
+      style: this.getStyle(floodPeriod),
+      onEachFeature: (feat, layer) => {
+        const isAktsomhet = floodPeriod === -1;
+        const popupText = `Bygg: ${feat.properties.id || feat.properties.osm_id}<br>
+          ${isAktsomhet ? 'Flomaktsomhetsområde' : `Flomsone: ${floodPeriod}-årsflom`}`;
+        layer.bindPopup(popupText);
+      }
+    });
+  }
+  
+  getStyle(period) {
     const styles = {
       10: { color: '#6ab0ff', weight: 1, fillOpacity: 0.4 },
       20: { color: '#5da1f2', weight: 1, fillOpacity: 0.4 },
@@ -21,284 +177,92 @@ export class BuildingLayerManager {
       200: { color: '#a64dff', weight: 1, fillOpacity: 0.3 },
       500: { color: '#c40000', weight: 1, fillOpacity: 0.3 },
       1000: { color: '#8b0000', weight: 1, fillOpacity: 0.3 },
-      aktsomhet: { color: '#ff8c00', weight: 1, fillOpacity: 0.3 },
       '-1': { color: '#ff8c00', weight: 1, fillOpacity: 0.3 }
     };
-    return styles[periodOrType] || styles[100];
+    return styles[period] || styles[100];
   }
   
-  // Fetch buildings from database
-  async fetchBuildingsFromDatabase(bbox, floodPeriod) {
-    console.log('🔍 Fetching buildings:', { bbox, floodPeriod });
-    
-    const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/rpc/get_buildings_in_bbox`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_CONFIG.anonKey,
-        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
-      },
-      body: JSON.stringify({
-        bbox_coords: bbox,
-        flood_period: floodPeriod
-      })
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP error ${response.status}: ${errorText}`);
-    }
-    
-    const data = await response.json();
-    console.log('✅ Buildings data received:', data);
-    return data;
-  }
-  
-  // Generate cache key for buildings
-  getCacheKey(bounds, floodPeriod) {
+  getCacheKey(floodPeriod) {
+    const bounds = this.map.getBounds();
     const precision = 0.01;
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
-    const roundedBounds = {
-      sw: { 
-        lat: Math.round(sw.lat / precision) * precision, 
-        lng: Math.round(sw.lng / precision) * precision 
-      },
-      ne: { 
-        lat: Math.round(ne.lat / precision) * precision, 
-        lng: Math.round(ne.lng / precision) * precision 
-      }
-    };
-    return `${floodPeriod}_${roundedBounds.sw.lat}_${roundedBounds.sw.lng}_${roundedBounds.ne.lat}_${roundedBounds.ne.lng}`;
+    return `${floodPeriod}_${Math.round(sw.lat / precision)}_${Math.round(sw.lng / precision)}_${Math.round(ne.lat / precision)}_${Math.round(ne.lng / precision)}`;
   }
   
-  // Load buildings for specific flood period
-  async loadBuildingsForPeriod(floodPeriod, isAktsomhet = false) {
-    const bounds = this.map.getBounds();
-    const cache = this.stateManager.getBuildingCache();
-    const cacheKey = this.getCacheKey(bounds, floodPeriod);
-    
-    // Check cache first
-    if (cache.has(cacheKey)) {
-      console.log(`Using cached buildings for ${floodPeriod}`);
-      return cache.get(cacheKey);
+  // Layer management
+  setFloodBuildings(layer) {
+    if (this.floodBuildings) {
+      this.map.removeLayer(this.floodBuildings);
     }
-    
-    try {
-      const bbox = [
-        bounds.getSouthWest().lng,
-        bounds.getSouthWest().lat,
-        bounds.getNorthEast().lng,
-        bounds.getNorthEast().lat
-      ];
-      
-      console.log(`Loading buildings for ${floodPeriod} from database...`);
-      
-      const data = await this.fetchBuildingsFromDatabase(bbox, floodPeriod);
-      
-      if (!data || !data.features) {
-        return null;
-      }
-      
-      console.log(`Loaded ${data.features.length} buildings for ${floodPeriod}`);
-      
-      // Create new layer
-      const buildingsLayer = L.geoJSON(data, {
-        style: this.getStyleForPeriod(isAktsomhet ? 'aktsomhet' : floodPeriod),
-        onEachFeature: (feat, layer) => {
-          const popupText = `Bygg OSM-id: ${feat.properties.id || feat.properties.osm_id}<br>
-            Type: ${feat.properties.element || 'unknown'}<br>
-            ${isAktsomhet ? 'Flomaktsomhetsområde' : `Flomsone: ${floodPeriod}-årsflom`}`;
-          layer.bindPopup(popupText);
-        }
-      });
-      
-      // Cache the result
-      cache.set(cacheKey, buildingsLayer);
-      return buildingsLayer;
-    } catch (err) {
-      console.warn(`Could not load buildings for ${floodPeriod}:`, err);
-      return null;
+    this.floodBuildings = layer;
+    if (layer) {
+      this.map.addLayer(layer);
     }
   }
   
-  // FIXED: Load flood buildings for current view
-  async loadFloodBuildingsInCurrentView() {
-    if (this.stateManager.isLoading()) {
-      console.log('Already loading buildings, skipping...');
-      return;
+  setAktsomhetBuildings(layer) {
+    if (this.aktsomhetBuildings) {
+      this.map.removeLayer(this.aktsomhetBuildings);
     }
+    this.aktsomhetBuildings = layer;
+    if (layer) {
+      this.map.addLayer(layer);
+    }
+  }
+  
+  clearFloodBuildings() {
+    if (this.floodBuildings) {
+      this.map.removeLayer(this.floodBuildings);
+      this.floodBuildings = null;
+    }
+  }
+  
+  clearAktsomhetBuildings() {
+    if (this.aktsomhetBuildings) {
+      this.map.removeLayer(this.aktsomhetBuildings);
+      this.aktsomhetBuildings = null;
+    }
+  }
+  
+  clearAllBuildings() {
+    this.clearFloodBuildings();
+    this.clearAktsomhetBuildings();
+  }
+  
+  // Event setup - SINGLE point of truth
+  setupEvents() {
+    // Map events with specific event types
+    this.map.on('moveend', () => this.scheduleUpdate('move'));
+    this.map.on('zoomend', () => this.scheduleUpdate('zoom'));
     
-    const zoom = this.map.getZoom();
-    const showFloodZones = this.stateManager.getShowFloodZones();
-    const currentFloodYear = this.stateManager.getCurrentFloodYear();
-    
-    console.log('🏗️ LoadFloodBuildings check:', { 
-      zoom, 
-      showFloodZones, 
-      currentFloodYear,
-      hasCurrentLayer: !!this.stateManager.getCurrentFloodBuildingsLayer()
+    // Control events - listen to both 'change' and 'input' events
+    document.addEventListener('input', (event) => {
+      if (event.target.classList.contains('flood-slider')) {
+        this.scheduleUpdate('slider');
+      } else if (event.target.id === 'show-flood-zones' || 
+                 event.target.id === 'overlay-flomAktsomhet') {
+        this.scheduleUpdate('checkbox');
+      }
     });
     
-    // Always remove buildings at low zoom
-    if (zoom <= 12) {
-      const currentLayer = this.stateManager.getCurrentFloodBuildingsLayer();
-      if (currentLayer) {
-        console.log('❌ Removing flood buildings due to low zoom');
-        this.map.removeLayer(currentLayer);
-        this.stateManager.setCurrentFloodBuildingsLayer(null);
+    document.addEventListener('change', (event) => {
+      if (event.target.id === 'show-flood-zones' || 
+          event.target.classList.contains('flood-slider') ||
+          event.target.id === 'overlay-flomAktsomhet') {
+        this.scheduleUpdate('change');
       }
-      return;
-    }
-    
-    // Don't load if flood zones are hidden
-    if (!showFloodZones) {
-      const currentLayer = this.stateManager.getCurrentFloodBuildingsLayer();
-      if (currentLayer) {
-        console.log('❌ Removing flood buildings - flood zones hidden');
-        this.map.removeLayer(currentLayer);
-        this.stateManager.setCurrentFloodBuildingsLayer(null);
-      }
-      return;
-    }
-    
-    this.stateManager.setIsLoadingBuildings(true);
-    
-    try {
-      // Always remove current layer before loading new one
-      const currentLayer = this.stateManager.getCurrentFloodBuildingsLayer();
-      if (currentLayer) {
-        console.log('🗑️ Removing existing flood buildings');
-        this.map.removeLayer(currentLayer);
-        this.stateManager.setCurrentFloodBuildingsLayer(null);
-      }
-      
-      // Load buildings for current flood year
-      console.log('📥 Loading buildings for flood year:', currentFloodYear);
-      const buildingsLayer = await this.loadBuildingsForPeriod(currentFloodYear, false);
-      
-      if (buildingsLayer) {
-        this.stateManager.setCurrentFloodBuildingsLayer(buildingsLayer);
-        buildingsLayer.addTo(this.map);
-        console.log('✅ Added flood buildings for year:', currentFloodYear);
-      }
-      
-    } catch (error) {
-      console.error('❌ Error loading flood buildings:', error);
-    } finally {
-      this.stateManager.setIsLoadingBuildings(false);
-    }
-  }
-  
-  // FIXED: Check if aktsomhet layer is actually visible  
-  isAktsomhetLayerVisible() {
-    // We need a way to check if the aktsomhet layer is visible
-    // This should be provided by the LayerManager
-    // For now, we'll check the checkbox state
-    const checkbox = document.getElementById('overlay-flomAktsomhet');
-    return checkbox && checkbox.checked;
-  }
-  
-  // FIXED: Handle aktsomhet buildings
-  async loadAktsomhetBuildingsInCurrentView() {
-    const zoom = this.map.getZoom();
-    const isAktsomhetVisible = this.isAktsomhetLayerVisible();
-    
-    console.log('🎯 LoadAktsomhetBuildings check:', { 
-      zoom, 
-      isAktsomhetVisible,
-      hasCurrentLayer: !!this.stateManager.getCurrentAktsomhetBuildingsLayer()
     });
-    
-    // Remove aktsomhet buildings at low zoom OR when layer is not visible
-    if (zoom <= 12 || !isAktsomhetVisible) {
-      const currentLayer = this.stateManager.getCurrentAktsomhetBuildingsLayer();
-      if (currentLayer) {
-        console.log('❌ Removing aktsomhet buildings -', zoom <= 12 ? 'low zoom' : 'layer not visible');
-        this.map.removeLayer(currentLayer);
-        this.stateManager.setCurrentAktsomhetBuildingsLayer(null);
-      }
-      return;
-    }
-    
-    try {
-      // Always remove current aktsomhet layer before loading new one
-      const currentLayer = this.stateManager.getCurrentAktsomhetBuildingsLayer();
-      if (currentLayer) {
-        console.log('🗑️ Removing existing aktsomhet buildings');
-        this.map.removeLayer(currentLayer);
-        this.stateManager.setCurrentAktsomhetBuildingsLayer(null);
-      }
-      
-      // Load aktsomhet buildings
-      console.log('📥 Loading aktsomhet buildings');
-      const buildingsLayer = await this.loadBuildingsForPeriod(-1, true);
-      
-      if (buildingsLayer) {
-        this.stateManager.setCurrentAktsomhetBuildingsLayer(buildingsLayer);
-        buildingsLayer.addTo(this.map);
-        console.log('✅ Added aktsomhet buildings');
-      }
-      
-    } catch (error) {
-      console.error('❌ Error loading aktsomhet buildings:', error);
-    }
   }
   
-  // FIXED: Debounced loading that checks conditions properly
-  debouncedLoadBuildings() {
-    clearTimeout(this.loadBuildingsTimeout);
-    this.loadBuildingsTimeout = setTimeout(async () => {
-      console.log('⏱️ Debounced building update triggered');
-      
-      // Only load buildings when appropriate
-      const zoom = this.map.getZoom();
-      if (zoom <= 12) {
-        console.log('🔍 Zoom too low, not loading any buildings');
-        return;
-      }
-      
-      // Load flood buildings only if they should be visible
-      if (this.stateManager.getShowFloodZones()) {
-        await this.loadFloodBuildingsInCurrentView();
-      }
-      
-      // Load aktsomhet buildings only if the layer is visible
-      if (this.isAktsomhetLayerVisible()) {
-        await this.loadAktsomhetBuildingsInCurrentView();
-      }
-    }, 200);
+  // Public methods for external use
+  setCurrentFloodYear(year) {
+    this.currentFloodYear = year;
+    this.scheduleUpdate();
   }
   
-  // NEW: Force refresh of building visibility
-  async refreshBuildingVisibility() {
-    console.log('🔄 Force refreshing building visibility');
-    
-    // Clear any pending updates
-    clearTimeout(this.loadBuildingsTimeout);
-    
-    // Check zoom first
-    const zoom = this.map.getZoom();
-    if (zoom <= 12) {
-      console.log('🔍 Zoom too low, removing all buildings');
-      const floodLayer = this.stateManager.getCurrentFloodBuildingsLayer();
-      const aktsomhetLayer = this.stateManager.getCurrentAktsomhetBuildingsLayer();
-      
-      if (floodLayer) {
-        this.map.removeLayer(floodLayer);
-        this.stateManager.setCurrentFloodBuildingsLayer(null);
-      }
-      if (aktsomhetLayer) {
-        this.map.removeLayer(aktsomhetLayer);
-        this.stateManager.setCurrentAktsomhetBuildingsLayer(null);
-      }
-      return;
-    }
-    
-    // Update flood buildings
-    await this.loadFloodBuildingsInCurrentView();
-    
-    // Update aktsomhet buildings
-    await this.loadAktsomhetBuildingsInCurrentView();
+  setShowFloodZones(show) {
+    this.showFloodZones = show;
+    this.scheduleUpdate();
   }
 }
